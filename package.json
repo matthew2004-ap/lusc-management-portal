@@ -1,0 +1,42 @@
+{
+  "name": "lusc-management-portal",
+  "main": "electron/main.cjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "admin:create": "tsx scripts/create-admin.ts",
+    "desktop": "electron .",
+    "desktop:dev": "concurrently -k \"npm run dev\" \"wait-on http://localhost:3000 && electron .\""
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.1.0",
+    "lucide-react": "^0.468.0",
+    "next": "^15.5.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "concurrently": "^9.2.1",
+    "electron": "^38.2.2",
+    "eslint": "^9.35.0",
+    "eslint-config-next": "^15.5.6",
+    "prisma": "^6.19.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2",
+    "wait-on": "^8.0.4"
+  }
+}

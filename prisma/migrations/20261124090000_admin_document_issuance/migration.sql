@@ -1,0 +1,4 @@
+ALTER TABLE "Member"
+ADD COLUMN "appointmentIssued" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "idCardIssued" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "certificateIssued" BOOLEAN NOT NULL DEFAULT false;

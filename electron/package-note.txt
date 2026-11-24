@@ -1,0 +1,1 @@
+Electron loads the Next.js app at LUSC_APP_URL or http://localhost:3000. Keep the server and database deployed centrally.
