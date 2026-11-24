@@ -18,7 +18,7 @@ export default async function MessagesPage({ searchParams }: Props) {
     user.accountRole
   );
 
-  const history = await prisma.message.findMany({
+  const historyQuery = prisma.message.findMany({
     where: {
       OR: [
         { senderId: user.id },
@@ -33,31 +33,33 @@ export default async function MessagesPage({ searchParams }: Props) {
     }
   });
 
-  const counterpartIds = [
-    ...new Set(
-      history.map((m) =>
-        m.senderId === user.id
-          ? m.recipientId
-          : m.senderId
-      )
-    )
-  ];
+  const contactsQuery = management
+    ? historyQuery.then((history) => {
+        const counterpartIds = [
+          ...new Set(
+            history.map((m) =>
+              m.senderId === user.id
+                ? m.recipientId
+                : m.senderId
+            )
+          )
+        ];
 
-  const contacts = management
-    ? await prisma.user.findMany({
-        where: {
-          id: { in: counterpartIds },
-          NOT: { id: user.id }
-        },
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          accountRole: true
-        },
-        orderBy: { fullName: "asc" }
+        return prisma.user.findMany({
+          where: {
+            id: { in: counterpartIds },
+            NOT: { id: user.id }
+          },
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            accountRole: true
+          },
+          orderBy: { fullName: "asc" }
+        });
       })
-    : await prisma.user.findMany({
+    : prisma.user.findMany({
         where: {
           accountRole: {
             in: ["ADMIN", "VCM", "VCF"]
@@ -75,46 +77,50 @@ export default async function MessagesPage({ searchParams }: Props) {
         ]
       });
 
+  const [history, contacts] = await Promise.all([
+    historyQuery,
+    contactsQuery
+  ]);
+
   const selected =
     contacts.find((c) => c.id === selectedId) ||
     contacts[0] ||
     null;
 
-  if (selected) {
-    await prisma.message.updateMany({
-      where: {
-        senderId: selected.id,
-        recipientId: user.id,
-        readAt: null
-      },
-      data: {
-        readAt: new Date()
-      }
-    });
-  }
-
   const messages = selected
-    ? await prisma.message.findMany({
-        where: {
-          OR: [
-            {
-              senderId: user.id,
-              recipientId: selected.id
-            },
-            {
-              senderId: selected.id,
-              recipientId: user.id
-            }
-          ]
-        },
-        orderBy: { createdAt: "asc" },
-        take: 150,
-        include: {
-          sender: {
-            select: { fullName: true }
+    ? await Promise.all([
+        prisma.message.updateMany({
+          where: {
+            senderId: selected.id,
+            recipientId: user.id,
+            readAt: null
+          },
+          data: {
+            readAt: new Date()
           }
-        }
-      })
+        }),
+        prisma.message.findMany({
+          where: {
+            OR: [
+              {
+                senderId: user.id,
+                recipientId: selected.id
+              },
+              {
+                senderId: selected.id,
+                recipientId: user.id
+              }
+            ]
+          },
+          orderBy: { createdAt: "asc" },
+          take: 150,
+          include: {
+            sender: {
+              select: { fullName: true }
+            }
+          }
+        })
+      ]).then(([, messages]) => messages)
     : [];
 
   return (

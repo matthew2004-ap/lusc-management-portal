@@ -6,9 +6,11 @@ import PortalShell from "@/components/PortalShell";
 export default async function AdminPage({searchParams}:{searchParams:Promise<{q?:string}>}){
  const user=await getCurrentUser(); if(!user) redirect("/login"); if(user.accountRole!=="ADMIN") redirect("/dashboard");
  const {q=""}=await searchParams; const term=q.trim();
- const members=await prisma.member.findMany({where:term?{OR:[{officialId:{contains:term,mode:"insensitive"}},{user:{fullName:{contains:term,mode:"insensitive"}}},{user:{email:{contains:term,mode:"insensitive"}}},{councilRole:{title:{contains:term,mode:"insensitive"}}}]}:undefined,include:{user:true,councilRole:true},orderBy:{createdAt:"desc"},take:250});
- const roles=await prisma.councilRole.findMany({orderBy:{title:"asc"}});
- const accounts=await prisma.user.findMany({orderBy:{createdAt:"desc"},take:150});
+ const [members,roles,accounts]=await Promise.all([
+  prisma.member.findMany({where:term?{OR:[{officialId:{contains:term,mode:"insensitive"}},{user:{fullName:{contains:term,mode:"insensitive"}}},{user:{email:{contains:term,mode:"insensitive"}}},{councilRole:{title:{contains:term,mode:"insensitive"}}}]}:undefined,include:{user:true,councilRole:true},orderBy:{createdAt:"desc"},take:250}),
+  prisma.councilRole.findMany({orderBy:{title:"asc"}}),
+  prisma.user.findMany({orderBy:{createdAt:"desc"},take:150})
+ ]);
  return <PortalShell><h1 className="page-title">System administration</h1><p className="subtle">Manage the central register, ratings and tenure completion.</p>
  <div className="card admin-register" style={{marginTop:22}}><div className="row" style={{justifyContent:"space-between"}}><div><h3>Member register</h3><p className="subtle">Search by name, email, role or official membership ID.</p></div><a className="btn light" href="/api/admin/export">Export CSV</a></div><form method="get" className="row search-form"><input name="q" defaultValue={term} placeholder="Search e.g. LUSC/26/PRO/001 or PRO"/><button className="btn">Search</button>{term&&<a className="btn light" href="/admin">Clear</a>}</form><p className="tiny-note">Showing up to 250 matching records.</p>
  <div className="table-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Official ID</th><th>Rating</th><th>Tenure</th><th>Update</th></tr></thead><tbody>

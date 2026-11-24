@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -22,7 +23,7 @@ export async function destroySession() {
   jar.delete(COOKIE);
 }
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return null;
   try {
@@ -30,7 +31,7 @@ export async function getCurrentUser() {
     if (!payload.sub) return null;
     return await prisma.user.findUnique({ where: { id: String(payload.sub) }, include: { member: { include: { councilRole: true } } } });
   } catch { return null; }
-}
+});
 
 export async function requireRole(roles: AccountRole[]) {
   const user = await getCurrentUser();

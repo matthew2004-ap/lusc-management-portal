@@ -34,21 +34,20 @@ export default async function Dashboard() {
   };
 
   if (isManagement) {
-    const [total, pending, approved, rejected] =
-      await Promise.all([
-        prisma.member.count(),
-        prisma.member.count({
-          where: { status: "PENDING" },
-        }),
-        prisma.member.count({
-          where: { status: "APPROVED" },
-        }),
-        prisma.member.count({
-          where: { status: "REJECTED" },
-        }),
-      ]);
+    const counts = await prisma.member.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    });
+    const countByStatus = new Map(
+      counts.map(({ status, _count }) => [status, _count._all])
+    );
 
-    statistics = { total, pending, approved, rejected };
+    statistics = {
+      total: counts.reduce((total, { _count }) => total + _count._all, 0),
+      pending: countByStatus.get("PENDING") ?? 0,
+      approved: countByStatus.get("APPROVED") ?? 0,
+      rejected: countByStatus.get("REJECTED") ?? 0,
+    };
   }
 
   const status = member?.status || "PENDING";
