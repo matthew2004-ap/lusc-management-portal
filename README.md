@@ -26,7 +26,7 @@ A full-stack Landmark University Student Council membership portal with a browse
 2. Open Terminal → New Terminal.
 3. Run `npm install`.
 4. If `.env` does not exist, run `copy .env.example .env`.
-5. Set `DATABASE_URL`, `AUTH_SECRET` (32+ random characters), `APP_URL`, and `TENURE_YEAR` in `.env`. Do not share `.env` or its secrets.
+5. Set `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET` (32+ random characters), `APP_URL`, and `TENURE_YEAR` in `.env`. Use the pooled connection for `DATABASE_URL` and the direct connection for `DIRECT_URL`. Do not share `.env` or its secrets.
 6. Run `npx prisma generate`.
 7. For a brand-new empty PostgreSQL database, run `npx prisma migrate deploy` to apply the complete migration history. For an existing database containing records, back it up first and use `npx prisma migrate dev` only after reviewing the migration plan. Never run `migrate reset` against real records.
 8. Run `npx prisma generate`.
