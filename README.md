@@ -40,7 +40,7 @@ With the web server running, open another terminal and run `npm run desktop`. Fo
 Many people may legitimately hold the same general position (for example, multiple College Representatives or Hostel Representatives). Therefore the system permits multiple members to select the same role title. Membership IDs remain unique. If LUSC requires each seat to be unique, define the seat more precisely (for example, `College Representative — College of Science`) and have the administrator approve the role dictionary. Do not globally enforce unique role titles without resolving this policy.
 
 ## Before official deployment
-- Move profile images to durable private object storage; `public/uploads` is only for local development and is not suitable for serverless hosting.
+- Create a Vercel Blob store and configure its `BLOB_READ_WRITE_TOKEN` in the Vercel project's environment variables (Production, and Preview if used). Profile photos are stored as public Blob URLs; local development uses `public/uploads`, which is not suitable for serverless hosting.
 - Add institutional email verification, password reset, rate limiting, CSRF/origin protection, security headers and an independent security review.
 - Add secure private storage and final PDF issuance/signature workflow for official documents. Current documents are printable portal views gated by admin issuance flags, not cryptographically signed institutional PDFs. The certificate is landscape A4 and the ID card is landscape wallet-card size. Official crest, signatures and signatory names still require approval from LUSC.
 - Confirm official role names/codes, tenure year, crest, approved document wording and signatories.
